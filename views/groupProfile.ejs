@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0-beta.1/angular-sanitize.js"></script>
+
+	<script src="angularjs/groupProfile.js"></script>
+  <head>
+    <title>Group Profile</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="" ng-app="groupProfile" ng-controller="groupProfileController" style="padding-top: 100px;" ng-init="noGroup=<%= noGroup%>; uname=<%= username %>; editGroup= false; groupData= <%= groupData %>; isMember = <%= isMember%>; isCreator=<%= isCreator %>; memberData=<%= memberData %>; ">
+    
+    <div ng-include src="'header.html'"></div>
+<!--     <header>
+    	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    		<div class="container">
+	    		<div class="navbar-header navbar-nav col-md-12">
+	    			<h3 style="margin-right:10px">Welcome <%= username %>
+	    			<div class="dropdown pull-right" style="top-margin:0px">
+					  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu_header" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					    <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu" aria-labelledby="dropdownMenu_header">
+					    <li><a href="/">Groups</a></li>
+					    <li><a href="/logout">Logout</a></li>
+					  </ul>
+					</div>
+	    			<button class="btn btn-default pull-right" style="margin-right:15px"><a style="text-decoration:none;" href="/userNewsFeed">Home</a></button>
+	    			<button class="btn btn-default pull-right" style="margin-right:15px"><a style="text-decoration:none;" href="/login"><%= username %></a></button>
+
+	    			<form method="get" action="/searchQuery" class="navbar-form navbar-right" role="search" style="margin-top:0px">
+			            <div class="form-group" style="margin-right:15px">
+			               <input type="text" class="form-control" name="searchQuery" placeholder="Search Facebook">
+			               <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+			          	 </div>
+			         </form>
+
+	    		</div>
+    		</div>
+    	</nav>
+    </header>	
+ -->    
+ 	<div ng-show="noGroup">No such group exists
+ 	</div>
+    <div class="container" ng-show="!noGroup">
+	    <div class="col-md-12">
+
+	    	<table class="table" ng-show="!editGroup">
+		 	<tbody>
+		 		<tr>
+		 			<td>Group Name</td>
+		 			<td>{{groupData.group_name}}</td>
+		 		</tr>
+		 		<tr>
+		 			<td>Description</td>
+		 			<td>{{groupData.description}}</td>
+		 		</tr>
+		 		
+		 		<tr ng-show="isMember">
+		 			<td ng-show="memberData[0]">Members</td>
+		 			<td>
+		               <ul ng-repeat="user in memberData" class="list-unstyled">
+		               		<li ><a href="/getUserProfile?userId={{user.user_id}}" >{{user.firstname}} {{user.lastname}}</a></li>
+		               </ul>
+		 			</td>
+		 		</tr>
+
+		 		<tr ng-show="(!isCreator && isMember)">
+		 			<td colspan="2">
+		 				<input type="button" value="Leave group" class="btn btn-default pull-right" style="margin-right:15px" ng-click="leaveGroup()">
+		 			</td>
+		 		</tr>
+		 		
+		 	</tbody>
+		 	<tfoot>
+		 		<tr ng-show="!isMember">
+		 			<td>
+		 				<button ng-click="joinGroup()" class="btn btn-default btn-sm pull-right">Join Group</button>
+		 			</td>
+		 		</tr>
+		 		<tr ng-show="isCreator">
+		 			<td colspan="2">
+		 				<input type="submit" value="Edit" class="btn btn-default pull-right" style="margin-right:15px" ng-click="changeToEdit()">
+		 			</td>
+		 		</tr>
+		 	</tfoot>
+		 	</form>
+		</table>
+		<table class="table" ng-show="editGroup">
+		 	<thead>
+		 		<tr>
+		 			<td colspan="2">Edit Group</td>
+		 		</tr>
+		 	</thead>
+		 	<tbody>
+		 		<form class="form-group" name="editGroupForm" validate>
+		 		<tr>
+		 			<td>Group Name</td>
+		 			<td>
+		 				<textarea  style="font-weight: normal" class="form-control" name="groupName" ng-model="updatedGroupData.groupName" form="editGroupForm" required> {{groupData.group_name}}</textarea><br>
+		 				{{noGroupNameError}}
+		 			</td>
+		 		</tr>
+		 		<tr>
+		 			<td>Description</td>
+		 			<td><textarea  style="font-weight: normal" class="form-control" name="groupDesc" ng-model="updatedGroupData.groupDesc" form="editGroupForm" required> {{groupData.description}}</textarea></td>
+		 		</tr>
+		 		<tr>
+		 			<td>Add Members</td>
+		 			<td>
+		               <input type="text" class="" ng-model="userName" placeholder="Search" style="margin-right:10px">
+		               <button ng-click="searchUser(userName)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+		               <ul ng-repeat="user in userList" class="list-unstyled">
+		               		<li ><a ng-click="addUser(user)" ng-show="membersIds.indexOf(user.user_id)==-1">
+		               			<div style="width:25%">{{user.firstname}} {{user.lastname}}
+		               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+		               		</a></li>
+		               		<li role="separator" class="divider"></li>
+		               </ul>
+		               <div ng-show="memberData[0]">
+		               Added members:
+		               <ul ng-repeat="user in memberData" class="list-unstyled">
+		               		<li ><a ng-click="removeUser(user)" ng-model="memberData" value="user">
+		               			<div style="width:30%">{{user.firstname}} {{user.lastname}}
+		               			<button class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></div>
+		               		</a></li>
+		               </ul>
+		               </div>
+		 			</td>
+		 		</tr>
+		 	</tbody>
+		 	<tfoot>
+		 		<tr>
+		 			<td colspan="2">
+		 				<input type="button" value="Delete Group" class="btn btn-default pull-right" style="margin-right:15px" ng-click="deleteGroup()">
+		 				<input type="submit" value="Save" class="btn btn-default pull-right" style="margin-right:15px" ng-click="updateGroup()">
+		 				<input type="button" value="Cancel" class="btn btn-default pull-right" style="margin-right:15px" ng-click="resetEdit()">
+		 			</td>
+		 		</tr>
+		 	</tfoot>
+		 	</form>
+		</table>
+		</div>	
+	</div>
+  </body>
+
+</html>

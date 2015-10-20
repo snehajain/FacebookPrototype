@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0-beta.1/angular-sanitize.js"></script>
+
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.min.css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker3.min.css" />
+
+
+	<script src="angularjs/homepage.js"></script>
+  <head>
+    <title>Home Page</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="" ng-app="userPage" ng-controller="userHomePage" style="padding-top: 100px;" ng-init="uname=<%= username %>; tab=1; EditAbout=false; friendActive =1;">
+    <div ng-include src="'header.html'"></div>
+    
+    <!-- <header>
+    	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    		<div class="container">
+	    		<div class="navbar-header navbar-nav col-md-12">
+	    			<h3 style="margin-right:10px">Welcome <%= username %>
+	    			<div class="dropdown pull-right" style="top-margin:0px">
+					  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu_header" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					    <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu" aria-labelledby="dropdownMenu_header">
+					    <li><a href="/groups">Groups</a></li>
+					    <li><a href="/logout">Logout</a></li>
+					  </ul>
+					</div>
+	    			<button class="btn btn-default pull-right" style="margin-right:15px"><a style="text-decoration:none;" href="/userNewsFeed">Home</a></button>
+	    			<button class="btn btn-default pull-right" style="margin-right:15px"><a style="text-decoration:none;" href="/login"><%= username %></a></button>
+
+	    			<form method="get" action="/searchQuery" class="navbar-form navbar-right" role="search" style="margin-top:0px">
+			            <div class="form-group" style="margin-right:15px">
+			               <input type="text" class="form-control" name="searchQuery" placeholder="Search Facebook">
+			               <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+			          	 </div>
+			         </form>
+
+	    		</div>
+    		</div>
+    	</nav>
+    </header>	 -->
+    
+
+    <div class="container">
+   
+	<ul class="nav nav-tabs nav-justified" > 
+			    		<li ng-class="{active:tab===1}"><a href="#Home" ng-click="tab=1" data-toggle="tab">Timeline</a></li>
+			    		<li ng-class="{active:tab===2}"><a ng-click="tab=2" href="" data-toggle="tab">About</a></li>
+			    		<li ng-class="{active:tab===3}"><a ng-click="tab=3" href="#Friends" data-toggle="tab">Friends</a></li>
+			    		<li ng-class="{active:tab===4}"><a ng-click="tab=4" href="" data-toggle="tab">Interests</a></li>
+			    	</ul>    	
+    
+
+	    <div class="tab tab-content">
+		    <div class="tab-pane" ng-class="{active:tab===1}" style="margin-bottom: 10px;" id="Home">
+			    <table class="table table-striped table-bordered" >
+				 	<thead>
+				 		<tr class="form-group">
+				 			<th ng-hide="">
+				 				<div>
+				 					<form class="form-group" name="postForm" validate>
+				 					<textarea  style="font-weight: normal; resize: none; margin-bottom:5px" class="form-control" name="postContent" form="postForm" ng-model="newPost.postContent" required wrap="soft" placeholder="What's on your mind"> </textarea>
+				 					<input type="submit" value="Post" ng-click="createPost()" class="btn btn-sm btn-default pull-right">
+				 					</form>
+				 				</div>
+				 			</th>
+				 		</tr>
+				 	</thead>
+				 	<tbody>
+				 		<tr class="form-group" ng-repeat="post in userPosts">
+					 		<td>
+					 		<div>	
+					 			<p ng-bind-html="toTrustedHTML(post.postContent)" ></p>
+					 			<p class="small text-right" >Created: {{post.createTime| datetime}}</p>
+					 		</div>
+					 	</td>
+				 		</tr>
+				 	</tbody>
+				</table>
+			</div>			
+			<div class="tab-pane" ng-class="{active:tab===2}" style="margin-bottom: 10px;" id="Friends">
+				<div ng-show="!EditAbout">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Personal Details</th>
+							</tr>
+						</thead>
+						<tbody>				
+							<tr class="form-group" ng-repeat="(key, value) in userAbout">
+								<td>
+									<div>	
+						 			<p class="text-left">{{key}}</p>
+						 			</div>
+								</td>
+								<td>
+									<div>	
+						 			<p class="text-left">{{value}}</p>
+						 			</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Life Events
+								</td>
+								<td>
+									<ul ng-repeat="event in userEvents" class="list-unstyled">
+					               		<li>{{event.event_date| datetime}} {{event.event_title}}</li>
+					               		<li ng-show="event.event_desc">{{event.event_desc}}</li>
+				               		</ul>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<td colspan="2">
+								<button class="btn btn-default pull-right" style="margin-right:15px" ng-click="EditAbout=true">Edit</button>
+							</td>
+						</tfoot>
+					</table>
+				</div>
+				<div ng-show="EditAbout">
+					<form class="form-group" name="editAboutForm">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Personal Details</th>
+							</tr>
+						</thead>
+						<tbody>				
+							<tr class="form-group" ng-repeat="(key, value) in userAbout">
+								<td>
+									<div>	
+						 			<p class="text-left">{{key}}</p>
+						 			</div>
+								</td>
+								<td>
+									<div>
+									<textarea  style="font-weight: normal" class="form-control" form="editAboutForm" ng-model="modifiedUserAbout[key]"   wrap="soft" placeholder="">{{userAbout[key]}}</textarea>	
+						 			</div>
+								</td>
+							</tr>
+							<tr ng-show="dateErrorMessage.length>0">
+								<td colspan="2">{{dateErrorMessage}}</td>
+							</tr>
+							<tr>
+								<td>
+									Life Events
+								</td>
+								<td>
+									<ul ng-repeat="event in userEvents" class="list-unstyled">
+					               		<li>{{event.event_date| datetime}} {{event.event_title}}</li>
+					               		<li ng-show="event.event_desc">{{event.event_desc}}</li>
+				               		</ul>
+										
+									<button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#addLifeEventModal">
+									  Add Life Event
+									</button>
+
+									<!-- Modal -->
+									<div class="modal fade" id="addLifeEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+									  <div class="modal-dialog" role="document">
+									    <div class="modal-content">
+									      <div class="modal-header">
+									        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									        <h4 class="modal-title" id="myModalLabel">New Event</h4>
+									      </div>
+									      <form action="/addEvent" method="POST" class="form-group" >
+									      <div class="modal-body">
+									      	<div class="form-group">
+								            	<label class="control-label">Event Title:</label>
+								            	<input type="text" class="form-control" name="newEvent.event_title" ng-model="newEvent.event_title">
+									        </div>
+									          <div class="form-group">
+									            <label for="message-text" class="control-label">Event Desc:</label>
+									            <textarea class="form-control" name="newEvent.event_desc" ng-model="newEvent.event_desc"></textarea>
+									          </div>
+									          <div class="form-group">
+									            <label for="message-text" class="control-label">Date:</label>
+									            <textarea class="form-control" name="newEvent.event_date" ng-model="newEvent.event_date"></textarea>
+									          </div>
+									          <div ng-show="newEventErrorMessage" class="form-group">
+									          	{{newEventErrorMessage}}
+									          </div>
+									      </div>
+									      <div class="modal-footer">
+									        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+									        <button type="submit" class="btn btn-primary" value="Save Event" ng-click="addEvent()">Save Event</button>
+									      </div>
+									      </form>
+									    </div>
+									  </div>
+									</div>
+								</td>
+						    </tr>
+
+						</tbody>
+						<tfoot>
+							<td colspan="2">
+								<input type="button" class="btn btn-default pull-right" style="margin-right:15px" value="Cancel" ng-click="EditAbout=false; modifiedUserAbout=userAbout;">
+								<input type="submit" class="btn btn-default pull-right" style="margin-right:15px" value="Save" ng-click="editAboutCall()">
+							</td>
+						</tfoot>
+					</table>
+					</form>
+				</div>
+				</div>
+			<div class="tab-pane" ng-class="{active:tab===3}" style="margin-bottom: 10px;" id="Friends">
+				<ul class="nav nav-tabs pull-right" > 
+			    		<li ng-class="{active:friendActive===1}"><a  ng-click="friendActive=1" data-toggle="friendActive">All Friends</a></li>
+			    		<li ng-class="{active:friendActive===2}"><a ng-click="friendActive=2" href="" data-toggle="friendActive">Friend Requests</a></li>
+			    </ul>  
+			    <div class="tab tab-content">
+			    <div class="tab-pane" ng-class="{active:friendActive===1}" style="margin-bottom: 10px;" id="AllFriends">
+					<table class="table">
+						<tbody>
+							<tr>
+								<td style="font-weight: normal">
+									Search <input type="text" ng-model="SearchFriend" placeholder="Search your friends"> 
+								</td>
+							</tr>
+							<tr class="form-group" ng-repeat="friend in userFriends | filter:SearchFriend">
+								<td>
+									<div style="width:40%"><a href="/getUserProfile?userId={{friend.user_id}}">{{friend.firstname}} {{friend.lastname}}</a><button class="btn btn-default btn-xs pull-right" ng-click="unfriendUser(friend.user_id)">Unfriend</button></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="tab-pane" ng-class="{active:friendActive===2}" style="margin-bottom: 10px;" id="FriendRequest">
+					<h3 ng-show="!userRequests[0]">No pending friend requests</h3>
+					<table class="table" ng-show="userRequests[0]">
+						<tbody>
+							<tr>
+								<td style="font-weight: normal">
+									Search <input type="text" ng-model="SearchRequest" placeholder="Search requests"> 
+								</td>
+							</tr>
+							<tr class="form-group" ng-repeat="user in userRequests | filter:SearchRequest">
+								<td>
+									<a href="/getUserProfile?userId={{user.user_id}}">{{user.firstname}} {{user.lastname}}</a>
+								</td>
+								<td><button class="btn btn-default btn-xs pull-right" ng-click="unfriendUser(friend.user_id)">Accept Request</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				</div>
+			</div>
+			<div class="tab-pane" ng-class="{active:tab===4}" style="margin-bottom: 10px;" id="Interests">
+				<table class="table">
+					<tbody>				
+						<tr>
+							<td>Music</td>
+							<td>
+								<ul ng-repeat="music in userMusic" class="list-unstyled">
+				               		<li style="width:40%; font-weight:bold">{{music.title}} <button ng-click="removeInterest(music.interest_id)" class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></li>
+				               		<li style="font-size:12px">{{music.description}}</li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+				               <input type="text" class="" ng-model="musicName" placeholder="Search your favorite music artists" style="margin-right:10px; width:30%">
+				               <button ng-click="searchInterest(musicName,1)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="music in searchList[0]" class="list-unstyled" >
+				               		<li ><a ng-click="addInterest(music.interest_id)" >
+				               			<div style="width:25%">{{music.title}}-{{music.description | limitTo: 10}}
+				               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+				               		</a></li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+
+							</td>
+						</tr>
+						<tr>
+							<td>Sports</td>
+							<td>
+								<ul ng-repeat="sport in userSports" class="list-unstyled" style="width:40%">
+				               		<li style="font-weight:bold">{{sport.title}} <button ng-click="removeInterest(sport.interest_id)" class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></li>
+				               		<li style="font-size:12px">{{sport.description}}</li>
+				               </ul>
+				               <input type="text" class="" ng-model="sportName" placeholder="Search your favorite Sports club" style="margin-right:10px; width:30%">
+				               <button ng-click="searchInterest(sportName,2)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="sport in searchList[1]" class="list-unstyled">
+				               		<li ><a ng-click="addInterest(sport.interest_id)" >
+				               			<div style="width:25%">{{sport.title}}-{{sport.description | limitTo: 10}}
+				               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+				               		</a></li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+
+							</td>
+						</tr>
+						<tr>
+							<td>Movie</td>
+							<td>
+								<ul ng-repeat="movie in userMovies" class="list-unstyled" style="width:40%">
+				               		<li style="font-weight:bold">{{movie.title}} <button ng-click="removeInterest(movie.interest_id)" class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></li>
+				               		<li style="font-size:12px">{{movie.description}}</li>
+				               </ul>
+				               <input type="text" class="" ng-model="movieName" placeholder="Search your favorite Movie" style="margin-right:10px; width:30%">
+				               <button ng-click="searchInterest(movieName,3)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="movie in searchList[2]" class="list-unstyled">
+				               		<li ><a ng-click="addInterest(movie.interest_id)" >
+				               			<div style="width:25%">{{movie.title}}-{{movie.description | limitTo: 10}}
+				               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+				               		</a></li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+
+							</td>
+						</tr>
+						<tr>
+							<td>Shows</td>
+							<td>
+								<ul ng-repeat="show in userShows" class="list-unstyled" style="width:40%">
+				               		<li style="font-weight:bold">{{show.title}} <button ng-click="removeInterest(show.interest_id)" class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></li>
+				               		<li style="font-size:12px">{{show.description}}</li>
+				               </ul>
+				               <input type="text" class="" ng-model="showName" placeholder="Search your favorite Shows" style="margin-right:10px; width:30%">
+				               <button ng-click="searchInterest(showName,4)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="show in searchList[3]" class="list-unstyled">
+				               		<li ><a ng-click="addInterest(show.interest_id)" >
+				               			<div style="width:25%">{{show.title}}-{{show.description | limitTo: 10}}
+				               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+				               		</a></li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+
+							</td>
+						</tr>
+						<tr>
+							<td>Books</td>
+							<td>
+								<ul ng-repeat="book in userBooks" class="list-unstyled" style="width:40%">
+				               		<li style="font-weight:bold">{{book.title}} <button ng-click="removeInterest(book.interest_id)" class="btn btn-danger btn-xs pull-right"><i class="glyphicon glyphicon-trash" style="margin-right:5px"></i>Remove</button></li>
+				               		<li style="font-size:12px">{{book.description}}</li>
+				               </ul>
+				               <input type="text" class="" ng-model="bookName" placeholder="Search your favorite Books" style="margin-right:10px; width:30%">
+				               <button ng-click="searchInterest(bookName,5)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="book in searchList[4]" class="list-unstyled">
+				               		<li ><a ng-click="addInterest(book.interest_id)" >
+				               			<div style="width:25%">{{book.title}}-{{book.description | limitTo: 10}}
+				               			<button class="btn btn-success btn-xs pull-right"><i class="glyphicon glyphicon-plus" style="margin-right:5px"></i>Add</button></div>
+				               		</a></li>
+				               		<li role="separator" class="divider"></li>
+				               </ul>
+
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				</div>
+		</div>
+	</div>
+  </body>
+
+</html>

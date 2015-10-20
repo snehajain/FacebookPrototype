@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0-beta.1/angular-sanitize.js"></script>
+
+	<script src="angularjs/groups.js"></script>
+  <head>
+    <title>Home Page</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="" ng-app="groupsPage" ng-controller="groupsPageController" style="padding-top: 100px;" ng-init="tab=1; uname=<%= username %>; loadUserGroupData();">
+    <div ng-include src="'header.html'"></div>
+
+    <div class="container">
+		<ul class="nav nav-tabs nav-justified" > 
+			<li ng-class="{active:tab===1}"><a href="#Home" ng-click="tab=1" data-toggle="tab">Create Group</a></li>
+			<li ng-class="{active:tab===2}"><a ng-click="tab=2" href="" data-toggle="tab">Your Groups</a></li>
+			<li ng-class="{active:tab===3}"><a ng-click="tab=3" href="#Friends" data-toggle="tab">Your Other Groups</a></li>
+			<li ng-class="{active:tab===4}"><a ng-click="tab=4" href="" data-toggle="tab">Friends Groups</a></li>
+		</ul>    	
+    
+	    <div class="tab tab-content">
+		    <div class="tab-pane" ng-class="{active:tab===1}" style="margin-bottom: 10px;" id="CreateGroup">
+			    <table class="table" >
+				 	<thead>
+				 		<tr>
+				 			<td colspan="2">Create New Group</td>
+				 		</tr>
+				 	</thead>
+				 	<tbody>
+				 		<form class="form-group" name="createGroupForm" validate>
+				 		<tr>
+				 			<td>Group Name</td>
+				 			<td>
+				 				<input type="text" style="font-weight: normal" class="form-control" name="groupName" form="createGroupForm" ng-model="newGroup.groupName" required wrap="soft"><br>
+				 				<label>{{noGroupNameError}}</label>
+				 			</td>
+				 		</tr>
+				 		<tr>
+				 			<td>Description</td>
+				 			<td>
+				 				<textarea  style="font-weight: normal" class="form-control" name="groupDesc" form="createGroupForm" ng-model="newGroup.groupDesc" required> </textarea>
+				 			</td>
+				 		</tr>
+				 		<tr>
+				 			<td>Add Members</td>
+				 			<td>
+				               <input type="text" class="" ng-model="userName" placeholder="Search" style="margin-right:10px">
+				               <button ng-click="searchUser(userName)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				               <ul ng-repeat="user in userList" class="list-unstyled">
+				               		<li ><a ng-click="addUser(user)" ng-show="membersIds.indexOf(user.user_id)==-1">{{user.firstname}} {{user.lastname}}</a></li>
+				               </ul>
+				               <div ng-show="members[0]">
+				               Added members:
+				               <ul ng-repeat="user in members" class="list-unstyled">
+				               		<li ><a ng-click="removeUser(user)" ng-model="members" value="user">{{user.firstname}} {{user.lastname}}</a></li>
+				               </ul>
+				               </div>
+				 			</td>
+				 		</tr>
+				 	</tbody>
+				 	<tfoot>
+				 		<tr>
+				 			<td colspan="2">
+				 				<input type="submit" value="Create" class="btn btn-default pull-right" style="margin-right:15px" ng-click="createGroup()">
+				 				<input type="button" value="Cancel" class="btn btn-default pull-right" style="margin-right:15px" ng-click="resetCreate()">
+				 			</td>
+				 		</tr>
+				 	</tfoot>
+				 	</form>
+				</table>
+			</div>			
+			<div class="tab-pane" ng-class="{active:tab===2}" style="margin-bottom: 10px;" id="Friends">
+				<div>
+					<p ng-hide="userGroupList[0]">No groups created by you</p>
+					<table class="table" ng-show="userGroupList[0]">
+						<thead>
+							<tr>
+								<th>Groups you created</th>
+							</tr>
+						</thead>
+						<tbody>	
+							<tr>
+								<td style="font-weight: normal">
+									Search <input type="text" ng-model="SearchMyGroup" placeholder="Search your Groups"> 
+								</td>
+							</tr>			
+							<tr class="form-group" ng-repeat="group in userGroupList| filter:SearchMyGroup">
+								<td>
+						 			<a class="text-left" href="/groupProfile?groupId={{group.group_id}}">{{group.group_name}}</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="tab-pane" ng-class="{active:tab===3}" style="margin-bottom: 10px;" id="Friends">
+				<table class="table">
+					<thead>
+						
+					</thead>
+					<tbody>
+						<tr>
+							<td style="font-weight: normal">
+								Search <input type="text" ng-model="SearchGroup" placeholder="Search your other Groups"> 
+							</td>
+						</tr>
+						<tr ng-show="otherGroupList[0]">
+								<td>Groups you're in</td>
+							</tr ng-show="otherGroupList[0]">
+							<tr class="form-group" ng-repeat="group in otherGroupList| filter:SearchGroup" >
+								<td>
+						 			<a class="text-left" href="/groupProfile?groupId={{group.group_id}}">{{group.group_name}}</a>
+								</td>
+							</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="tab-pane" ng-class="{active:tab===4}" style="margin-bottom: 10px;" id="FriendsGroups">
+				<div>
+					<p ng-hide="friendGroupList[0]">No groups suggestions for you</p>
+					<table class="table" ng-show="userGroupList[0]">
+						<thead>
+							<tr>
+								<th>Friend's Groups</th>
+							</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td style="font-weight: normal">
+								Search <input type="text" ng-model="FriendGroupSet" placeholder="Search your friends groups"> 
+							</td>
+						</tr>				
+							<tr class="form-group" ng-repeat="group in friendGroupList| filter:FriendGroupSet">
+								<td>
+						 			<a class="text-left" href="/groupProfile?groupId={{group.group_id}}">{{group.group_name}}</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+  </body>
+
+</html>

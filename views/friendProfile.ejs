@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0-beta.1/angular-sanitize.js"></script>
+	
+
+	<script src="angularjs/friendProfile.js"></script>
+  <head>
+    <title>Home Page</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="" ng-app="friendProfilePage" ng-controller="friendProfilePageController" style="padding-top: 100px;" ng-init=" noData=false; uname=<%= username %>; tab=1; friendId=<%= friendId%>; isFriend=<%= isFriend %>; loadData();">
+
+  	<div ng-include src="'header.html'"></div>
+        
+    <div ng-show="!isFriend" class="container">
+    	<div ng-show="noData">No such user exists</div>
+    	<div class="dropdown" ng-show="!noData">
+		  {{friendFirstName}} {{friendLastName}}<button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="margin-left:10px">
+		    {{requestStatus}}
+		    <span class="caret"></span>
+		  </button></p>
+		  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="margin-left:100px">
+		    <li ng-show="requestStatus==='Respond To Request'" ><a href="#" ng-click="changeRequestStatus('acceptRequest')">Accept Request</a></li>
+		    <li ng-show="requestStatus==='Respond To Request'" ><a href="#" ng-click="changeRequestStatus('declineRequest')">Decline Request</a></li>
+		    <li ng-show="requestStatus==='Send Friend Request'" ><a href="#" ng-click="changeRequestStatus('addAsFriend')">Add as friend</a></li>
+		    <li ng-show="requestStatus==='Request Pending'" ><a href="#" ng-click="changeRequestStatus('cancelRequest')">Cancel Request</a></li>
+		  </ul>
+		</div>
+			
+    </div>
+    <div ng-show="isFriend" class="container">
+   <h3 style="margin-right:10px">{{friendFirstName}} {{friendLastName}}</h3> 
+	<ul class="nav nav-tabs nav-justified" > 
+			    		<li ng-class="{active:tab===1}"><a href="#Home" ng-click="tab=1" data-toggle="tab">Timeline</a></li>
+			    		<li ng-class="{active:tab===2}"><a ng-click="tab=2" href="" data-toggle="tab">About</a></li>
+			    		<li ng-class="{active:tab===3}"><a ng-click="tab=3" href="#Friends" data-toggle="tab">Friends</a></li>
+			    		<li ng-class="{active:tab===4}"><a ng-click="tab=4" href="" data-toggle="tab">Interests</a></li>
+			    	</ul>    	
+    
+
+	    <div class="tab tab-content">
+		    <div class="tab-pane" ng-class="{active:tab===1}" style="margin-bottom: 10px;" id="Home">
+			    <table class="table table-striped table-bordered" >
+				 	<tbody>
+				 		<tr ng-show="!userPosts" colspan="2">
+				 			<td> No posts yet</td>
+				 		</tr>
+				 		<tr class="form-group" ng-repeat="post in userPosts">
+					 		<td>
+					 		<div>	
+					 			<p ng-bind-html="toTrustedHTML(post.postContent)" ></p>
+					 			<p class="small text-right" >Created: {{post.createTime| datetime}}</p>
+					 		</div>
+					 	</td>
+				 		</tr>
+				 	</tbody>
+				</table>
+			</div>			
+			<div class="tab-pane" ng-class="{active:tab===2}" style="margin-bottom: 10px;" id="Friends">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Personal Details</th>
+							</tr>
+						</thead>
+						<tbody>				
+							<tr class="form-group" ng-repeat="(key, value) in userAbout">
+								<td>
+									<div>	
+						 			<p class="text-left">{{key}}</p>
+						 			</div>
+								</td>
+								<td>
+									<div>	
+						 			<p class="text-left">{{value}}</p>
+						 			</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Life Events
+								</td>
+								<td>
+									<ul ng-repeat="event in userEvents" class="list-unstyled">
+					               		<li>{{event.event_date| datetime}} {{event.event_title}}</li>
+					               		<li>{{event.event_desc}}</li>
+				               		</ul>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			<div class="tab-pane" ng-class="{active:tab===3}" style="margin-bottom: 10px;" id="Friends">
+				<table class="table">
+					<thead>
+						
+					</thead>
+					<tbody>
+						<tr>
+							<td style="font-weight: normal">
+								Search <input type="text" ng-model="SearchFriend" placeholder="Search your friends"> 
+							</td>
+						</tr>
+						<tr class="form-group" ng-repeat="friend in userFriends | filter:SearchFriend">
+							<td>
+								<a href="/getUserProfile?userId={{friend.user_id}}">{{friend.firstname}} {{friend.lastname}}</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="tab-pane" ng-class="{active:tab===4}" style="margin-bottom: 10px;" id="Interest">
+				<table class="table">
+					<tbody>				
+						<tr ng-show="userMusic">
+							<td>Music</td>
+							<td>
+								<ul ng-repeat="music in userMusic" class="list-unstyled">
+				               		<li style="font-weight:bold">{{music.title}} </li>
+				               		<li style="font-size:12px">{{music.description}}</li>
+				               </ul>
+							</td>
+						</tr>
+						<tr ng-show="userSports">
+							<td>Sports</td>
+							<td>
+								<ul ng-repeat="sport in userSports" class="list-unstyled">
+				               		<li style="font-weight:bold">{{sport.title}}</li>
+				               		<li style="font-size:12px">{{sport.description}}</li>
+				               </ul>
+							</td>
+						</tr>
+						<tr ng-show="userMovies">
+							<td>Movie</td>
+							<td>
+								<ul ng-repeat="movie in userMovies" class="list-unstyled">
+				               		<li style="font-weight:bold">{{movie.title}}</li>
+				               		<li style="font-size:12px">{{movie.description}}</li>
+				               </ul>
+							</td>
+						</tr>
+						<tr ng-show="userShows">
+							<td>Shows</td>
+							<td>
+								<ul ng-repeat="show in userShows" class="list-unstyled">
+				               		<li style="font-weight:bold">{{show.title}} </li>
+				               		<li style="font-size:12px">{{show.description}}</li>
+				               </ul>				          
+							</td>
+						</tr>
+						<tr ng-show="userBooks">
+							<td>Books</td>
+							<td>
+								<ul ng-repeat="book in userBooks" class="list-unstyled">
+				               		<li style="font-weight:bold">{{book.title}}</li>
+				               		<li style="font-size:12px">{{book.description}}</li>
+				               </ul>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				</div>
+		</div>
+	</div>
+  </body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0-beta.1/angular-sanitize.js"></script>
+
+	<script src="angularjs/search.js"></script>
+  <head>
+    <title>Search</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+	  <body class="" ng-app="searchPage" ng-controller="searchPageController" style="padding-top: 100px;" ng-init="userList=<%= userResults %>; uname=<%= username %>; groupResults = <%= groupResults%>">
+	  	<div ng-include src="'header.html'"></div>
+
+    <div class="container">
+    	<div class="col-md-6">
+			    <table class="table table-striped table-bordered" >
+				 	<thead>
+				 		<tr class="form-group">
+				 			<th>
+				 				Users
+				 			</th>
+				 		</tr>
+				 	</thead>
+				 	<tbody>
+				 		<tr class="form-group" ng-hide="userList[0]">
+					 		<td>
+					 		<div>	
+					 			No users found
+					 		</div>
+					 	</td>
+				 		</tr>
+				 		<tr class="form-group" ng-repeat="user in userList">
+					 		<td>
+					 		<div>	
+					 			<a ng-href="/getUserProfile?userId={{user.user_id}}" > {{user.firstname}} {{user.lastname}}</a>
+					 		</div>
+					 	</td>
+				 		</tr>
+				 	</tbody>
+				</table>
+			</div>
+			<div class="col-md-6">
+				<table class="table table-striped table-bordered" >
+				 	<thead>
+				 		<tr class="form-group">
+				 			<th ng-hide="">
+				 				Groups
+				 			</th>
+				 		</tr>
+				 	</thead>
+				 	<tbody>
+				 		<tr class="form-group" ng-hide="groupResults[0]">
+					 		<td>
+					 		<div>	
+					 			No groups found
+					 		</div>
+					 	</td>
+				 		</tr>
+				 		<tr class="form-group" ng-repeat="group in groupResults">
+					 		<td>
+					 		<div>	
+					 			<a ng-href="/groupProfile?groupId={{group.group_id}}"> {{group.group_name}}</a>
+					 		</div>
+					 	</td>
+				 		</tr>
+				 	</tbody>
+				</table>
+			</div>
+    </div>
+	 </body>
+  </html>
